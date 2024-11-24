@@ -1,15 +1,14 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from django.views.decorators.csrf import csrf_exempt
-
 from .models import Service
 from .serializers import ServiceSerializer
 
-from speciality.models import Speciality
-from authUser.models import CustomUser
+# from speciality.models import Speciality
+# from authUser.models import CustomUser
 
 
 class ServiceListView(APIView):
@@ -18,6 +17,10 @@ class ServiceListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,
+        responses={200: ServiceSerializer(many=True)},
+    )
     def get(self, request):
         """
         Метод для получения списка объектов услуга.
@@ -33,6 +36,10 @@ class ServiceDetailView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,
+        responses={200: ServiceSerializer(many=True)},
+    )
     def get(self, request, pk):
         try:
             service = Service.objects.get(pk=pk)
@@ -44,41 +51,48 @@ class ServiceDetailView(APIView):
         return Response({"message": "Service found successfully."}, status=status.HTTP_200_OK)
 
 
-class SpecialityServiceListView(APIView):
-    """
-    Класс просмотра списка услуг специализации.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        """
-        Метод для получения объектов Специализации.
-        """
-        queryset = super().get_queryset()
-        queryset = queryset.filter(speciality=self.kwargs.get('pk'))
-
-        return queryset
-
-    def get_context_data(self, *args, **kwargs):
-        """
-        Метод для получения списка объектов услуги.
-        """
-        context_data = super().get_context_data(*args, **kwargs)
-
-        speciality_item = Speciality.objects.get(pk=self.kwargs.get('pk'))
-        context_data['speciality_pk'] = speciality_item.pk
-
-        return context_data
+# class SpecialityServiceListView(APIView):
+#     """
+#     Класс просмотра списка услуг специализации.
+#     """
+#     permission_classes = [IsAuthenticated]
+#
+#     @extend_schema(
+#         request=None,
+#         responses={200: ServiceSerializer(many=True)},
+#     )
+#     def get(self, request):
+#         """
+#         Метод для получения объектов услуг.
+#         """
+#         queryset = super().get_queryset()
+#         queryset = queryset.filter(speciality=self.kwargs.get('pk'))
+#
+#         return queryset
+#
+#     def get_context_data(self, *args, **kwargs):
+#         """
+#         Метод для получения списка объектов услуги.
+#         """
+#         context_data = super().get_context_data(*args, **kwargs)
+#
+#         speciality_item = Speciality.objects.get(pk=self.kwargs.get('pk'))
+#         context_data['speciality_pk'] = speciality_item.pk
+#
+#         return context_data
 
 
 class ServiceCreateView(APIView):
     """
     Класс для создания объекта Услуга.
     """
-    @csrf_exempt
+    @extend_schema(
+        request=ServiceSerializer,
+        responses={201: {"message": "Service created successful"}},
+    )
     def post(self, request):
         """
-        Метод для создания новой специализации.
+        Метод для создания новой услуги.
         """
         if request.user.role != 'Admin':
             return Response({"error": "Access denied. Only admin can perform this action"},
@@ -100,6 +114,10 @@ class ServiceUpdateView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=ServiceSerializer,
+        responses={201: {"message": "Service updated successful"}},
+    )
     def put(self, request, pk):
         try:
             service = Service.objects.get(pk=pk)
@@ -121,6 +139,10 @@ class ServiceDeleteView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=ServiceSerializer,
+        responses={204: {"message": "Service deleted successful"}},
+    )
     def delete(self, request, pk):
         try:
             service = Service.objects.get(pk=pk)

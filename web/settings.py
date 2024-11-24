@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'corsheaders',
     'speciality',
     'appointments',
-    'service'
+    'service',
+    'drf_spectacular',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,14 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',  # Требуется аутентификация для всех запросов
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Medical Center',
+    'DESCRIPTION': 'Medical Center',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
 }
 
 WSGI_APPLICATION = 'web.wsgi.application'

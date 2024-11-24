@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,6 +16,10 @@ class AppointmentListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,
+        responses={200: AppointmentSerializer(many=True)},
+    )
     def get(self, request):
         """
         Метод для получения списка записей к врачу.
@@ -27,7 +32,10 @@ class AppointmentListView(APIView):
 class AppointmentCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={201: {"message": "Appointment created successful"}},
+    )
     def post(self, request):
         """
         Метод для создания новой записи.
@@ -45,7 +53,10 @@ class AppointmentCreateView(APIView):
 class AppointmentUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={201: {"message": "Appointment updated successful"}},
+    )
     def put(self, request, pk):
         """
         Метод для обновления записи.
@@ -67,7 +78,10 @@ class AppointmentUpdateView(APIView):
 class AppointmentDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={204: {"message": "Appointment deleted successful"}},
+    )
     def delete(self, request, pk):
         """
         Метод для удаления записей.
@@ -85,7 +99,10 @@ class AppointmentDeleteView(APIView):
 class TimetableCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={201: {"message": "Timetable created successful"}},
+    )
     def post(self, request):
         """
         Метод для создания рабочего дня.
@@ -110,6 +127,10 @@ class TimetableListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,
+        responses={200: TimetableSerializer(many=True)},
+    )
     def get(self, request):
         """
         Метод для получения списка записей к врачу.
@@ -122,7 +143,10 @@ class TimetableListView(APIView):
 class TimetableUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={201: {"message": "Timetable updated successful"}},
+    )
     def put(self, request, pk):
         """
         Метод для обновления дней.
@@ -148,7 +172,10 @@ class TimetableUpdateView(APIView):
 class TimetableDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=AppointmentSerializer,
+        responses={204: {"message": "Timetable deleted successful"}},
+    )
     def delete(self, request, pk):
         """
         Метод для удаления дней.

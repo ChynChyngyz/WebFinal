@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,9 +6,6 @@ from rest_framework.permissions import IsAuthenticated  # , IsAdminUser
 
 from .models import Speciality
 from .serializers import SpecialitySerializer
-# from .forms import SpecialityForm
-
-from django.views.decorators.csrf import csrf_exempt
 
 
 class SpecialityListView(APIView):
@@ -16,6 +14,10 @@ class SpecialityListView(APIView):
     """
     permission_classes = [IsAuthenticated]
 
+    @extend_schema(
+        request=None,  # none потому что GET-запрос не имеет тела
+        responses={200: SpecialitySerializer(many=True)},
+    )
     def get(self, request):
         """
         Метод для получения списка специализаций.
@@ -43,7 +45,10 @@ class SpecialityListView(APIView):
 class SpecialityCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=SpecialitySerializer,
+        responses={201: {"message": "Speciality created successful"}},
+    )
     def post(self, request):
         """
         Метод для создания новой специализации.
@@ -65,7 +70,10 @@ class SpecialityCreateView(APIView):
 class SpecialityUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=SpecialitySerializer,
+        responses={201: {"message": "Speciality updated successful"}},
+    )
     def put(self, request, pk):
         """
         Метод для обновления специализации.
@@ -91,7 +99,10 @@ class SpecialityUpdateView(APIView):
 class SpecialityDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @csrf_exempt
+    @extend_schema(
+        request=SpecialitySerializer,
+        responses={204: {"message": "Speciality deleted successful"}},
+    )
     def delete(self, request, pk):
         """
         Метод для удаления специализации.
@@ -108,18 +119,3 @@ class SpecialityDeleteView(APIView):
         serializer = SpecialitySerializer(speciality, data=request.data, partial=True)
         speciality.delete()
         return Response({"message": "Speciality deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
-
-
-class SpecialityListAPIView(APIView):
-    """
-    API для получения списка специализаций в формате JSON.
-    """
-    permission_classes = [IsAuthenticated]  # Ограничение доступа для аутентифицированных пользователей
-
-    def get(self, request):
-        """
-        Метод для получения списка специализаций.
-        """
-        specialities = Speciality.objects.all()  # Получаем все специализации
-        serializer = SpecialitySerializer(specialities, many=True)  # Сериализуем данные
-        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from .models import Service
 
@@ -11,6 +12,7 @@ class ServiceSerializer(serializers.ModelSerializer):
         # fields = ['title', 'price', 'description', 'image', 'speciality']
         fields = '__all__'
 
+    @extend_schema_field(serializers.URLField)
     def get_image_url(self, obj):
         """
         Возвращаем полный URL изображения для сериализатора
