@@ -43,6 +43,10 @@ class Appointment(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     price = models.FloatField(verbose_name='Цена')
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(args, kwargs)
+        self.service = None
+
     def __str__(self):
         return f'{self.service} ({self.doctor}): ({self.status_of_appointment}) - {self.user}'
 

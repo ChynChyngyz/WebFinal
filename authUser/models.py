@@ -26,6 +26,7 @@ class CustomUserManager(BaseUserManager):
             role=role,
             **extra_fields
         )
+
         user.set_password(password)
         user.save(using=self._db)
         return user
@@ -70,7 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     education = models.TextField(blank=True, null=True, verbose_name='Образование')
 
     is_active = models.BooleanField(default=True, verbose_name='Активен')
-    is_staff = models.BooleanField(default=False, verbose_name='Сотрудник')  # Доступ к админке
+    is_staff = models.BooleanField(default=False, verbose_name='Сотрудник')
     is_superuser = models.BooleanField(default=False, verbose_name='Суперпользователь')
 
     objects = CustomUserManager()

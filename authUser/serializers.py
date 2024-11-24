@@ -23,7 +23,7 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = '__all__'
+        fields = ['nickname', 'email', 'first_name', 'last_name', 'password', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):

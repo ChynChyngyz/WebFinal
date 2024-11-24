@@ -90,6 +90,10 @@ class TimetableCreateView(APIView):
         """
         Метод для создания рабочего дня.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         data = request.data
         serializer = TimetableSerializer(data=data)
 
@@ -121,10 +125,14 @@ class TimetableUpdateView(APIView):
     @csrf_exempt
     def put(self, request, pk):
         """
-        Метод для обновления записи.
+        Метод для обновления дней.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
-            speciality = Timetable.objects.get(pk=pk)  # Нахождение специализации
+            speciality = Timetable.objects.get(pk=pk)
         except Timetable.DoesNotExist:
             return Response({"error": "Timetable not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -143,8 +151,12 @@ class TimetableDeleteView(APIView):
     @csrf_exempt
     def delete(self, request, pk):
         """
-        Метод для удаления записей.
+        Метод для удаления дней.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             speciality = Timetable.objects.get(pk=pk)
         except Timetable.DoesNotExist:

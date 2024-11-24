@@ -1,14 +1,15 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated  # , IsAdminUser
+
 from .models import Speciality
-# from .forms import SpecialityForm
 from .serializers import SpecialitySerializer
+# from .forms import SpecialityForm
+
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.permissions import IsAuthenticated
 
 
-# Класс для списка специализаций
 class SpecialityListView(APIView):
     """
     Класс для вывода списка специализаций.
@@ -47,6 +48,10 @@ class SpecialityCreateView(APIView):
         """
         Метод для создания новой специализации.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         data = request.data
         serializer = SpecialitySerializer(data=data)
 
@@ -65,6 +70,10 @@ class SpecialityUpdateView(APIView):
         """
         Метод для обновления специализации.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             speciality = Speciality.objects.get(pk=pk)  # Нахождение специализации
         except Speciality.DoesNotExist:
@@ -87,6 +96,10 @@ class SpecialityDeleteView(APIView):
         """
         Метод для удаления специализации.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             speciality = Speciality.objects.get(pk=pk)
         except Speciality.DoesNotExist:
