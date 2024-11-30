@@ -1,12 +1,17 @@
+# from django.views.decorators.csrf import csrf_exempt
+
 from drf_spectacular.utils import extend_schema
+
+from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from .models import Appointment, Timetable
-# from .forms import SpecialityForm
-from .serializers import AppointmentSerializer, TimetableSerializer
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.permissions import IsAuthenticated
+
+from .models import Appointment, Timetable
+
+# from .forms import SpecialityForm
+
+from .serializers import AppointmentSerializer, TimetableSerializer
 
 
 # Класс для списка специализаций
@@ -40,6 +45,10 @@ class AppointmentCreateView(APIView):
         """
         Метод для создания новой записи.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         data = request.data
         serializer = AppointmentSerializer(data=data)
 
@@ -61,6 +70,10 @@ class AppointmentUpdateView(APIView):
         """
         Метод для обновления записи.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             speciality = Appointment.objects.get(pk=pk)  # Нахождение специализации
         except Appointment.DoesNotExist:
@@ -86,6 +99,10 @@ class AppointmentDeleteView(APIView):
         """
         Метод для удаления записей.
         """
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             speciality = Appointment.objects.get(pk=pk)
         except Appointment.DoesNotExist:

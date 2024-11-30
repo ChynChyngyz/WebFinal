@@ -53,6 +53,10 @@ class AllUsersView(APIView):
         responses={200: UserSerializer(many=True)},
     )
     def get(self, request):
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         users = CustomUser.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

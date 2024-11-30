@@ -119,6 +119,10 @@ class ServiceUpdateView(APIView):
         responses={201: {"message": "Service updated successful"}},
     )
     def put(self, request, pk):
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             service = Service.objects.get(pk=pk)
         except Service.DoesNotExist:
@@ -144,6 +148,10 @@ class ServiceDeleteView(APIView):
         responses={204: {"message": "Service deleted successful"}},
     )
     def delete(self, request, pk):
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+
         try:
             service = Service.objects.get(pk=pk)
         except Service.DoesNotExist:
@@ -151,4 +159,4 @@ class ServiceDeleteView(APIView):
 
         serializer = ServiceSerializer(service, data=request.data, partial=True)
         service.delete()
-        return Response({"message": "Speciality deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Service deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
