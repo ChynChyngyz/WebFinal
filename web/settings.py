@@ -145,14 +145,14 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.mail.ru'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'medical.mc@mail.ru'
-EMAIL_HOST_PASSWORD = 'password'
-EMAIL_USE_TLS = True
-EMAIL_USE_SSL = False
-SERVER_EMAIL = EMAIL_HOST_USER
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+EMAIL_HOST = 'smtp.yandex.ru'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'Bicos-Abricos@yandex.ru'
+EMAIL_HOST_PASSWORD = 'hndkcsdjxpybehjl'
+DEFAULT_FROM_EMAIL = 'Bicos-Abricos@yandex.ru'
+
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
 
 LANGUAGE_CODE = 'en-us'
 

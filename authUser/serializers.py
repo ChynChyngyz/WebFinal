@@ -8,8 +8,7 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         # указывается все поля модели, которые должны быть в JSON
-        # role: User, Doctor, ?Admin?
-        fields = ['nickname', 'email', 'first_name', 'last_name', 'password', 'role']
+        fields = ['id', 'is_active', 'nickname', 'email', 'first_name', 'last_name', 'password', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):

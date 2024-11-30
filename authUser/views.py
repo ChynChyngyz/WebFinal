@@ -1,3 +1,7 @@
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404
+from django.urls import reverse
+
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -5,6 +9,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .serializers import UserSerializer, DoctorSerializer
 from .models import CustomUser
+from .utils import confirmation_token
 
 from drf_spectacular.utils import extend_schema  # OpenApiParameter, OpenApiExample
 # from drf_spectacular.types import OpenApiTypes
@@ -18,11 +23,44 @@ class RegisterView(APIView):
         responses={201: {"message": "User created successfully"}},
     )
     def post(self, request):
+        # email, password, nickname = (request.data.get("email"), request.data.get("password"),
+        #                              request.data.get("nickname"))
         serializer = UserSerializer(data=request.data)
+
         if serializer.is_valid():
-            user = serializer.save()  # Создаём нового пользователя
-            return Response({"message": "User created successfully"}, status=status.HTTP_201_CREATED)
+            user = serializer.save(is_active=False)
+
+            token = confirmation_token.make_token(user)
+
+            confirmation_url = request.build_absolute_uri(
+                reverse('register_confirm', kwargs={'uid': user.pk, 'token': token})
+            )
+
+            send_mail(
+                subject="Please confirm registration!",
+                message=f"Hi, {user.nickname}! Follow this link {confirmation_url}",
+                from_email="Bicos-Abricos@yandex.ru",
+                recipient_list=[user.email, ]
+            )
+            print(f"qwerty {user.email}")
+            return Response({"message": "User created successfully, please confirm registration"},
+                            status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterConfirmView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, uid, token):
+        user = get_object_or_404(CustomUser, pk=uid)
+
+        if confirmation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            return Response({"message": "Email successfully verified. You can now log in."},
+                            status=status.HTTP_200_OK)
+
+        return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CurrentUserView(APIView):
@@ -80,3 +118,24 @@ class DoctorView(APIView):
             "role": doctor.role,
             "id": doctor.id
         })
+
+
+class DeleteUser(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(
+        request=None,
+        responses={200: DoctorSerializer(many=True)},
+    )
+    def delete(self, request, pk):
+        if request.user.role != 'Admin':
+            return Response({"error": "Access denied. Only admin can perform this action"},
+                            status=status.HTTP_403_FORBIDDEN)
+        try:
+            user = CustomUser.objects.get(pk=pk)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserSerializer(user, data=request.data, partial=True)
+        user.delete()
+        return Response({"message": "Service deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
