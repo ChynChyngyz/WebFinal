@@ -71,7 +71,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     education = models.TextField(blank=True, null=True, verbose_name='Образование')
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='User', verbose_name='Роль')
-    is_active = models.BooleanField(default=True, verbose_name='Активен')
+    is_active = models.BooleanField(default=False, verbose_name='Активен')  # default=True
     is_staff = models.BooleanField(default=False, verbose_name='Сотрудник')
     is_superuser = models.BooleanField(default=False, verbose_name='Суперпользователь')
 

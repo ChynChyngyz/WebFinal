@@ -20,7 +20,7 @@ class RegisterView(APIView):
 
     @extend_schema(
         request=UserSerializer,
-        responses={201: {"message": "User created successfully"}},
+        responses={201: {"message": "User created successfully, please confirm registration"}},
     )
     def post(self, request):
         # email, password, nickname = (request.data.get("email"), request.data.get("password"),
@@ -32,13 +32,13 @@ class RegisterView(APIView):
 
             token = confirmation_token.make_token(user)
 
-            confirmation_url = request.build_absolute_uri(
-                reverse('register_confirm', kwargs={'uid': user.pk, 'token': token})
+            confirmation_register_url = request.build_absolute_uri(
+                reverse('register_confirm', kwargs={'pk': user.pk, 'token': token})
             )
 
             send_mail(
                 subject="Please confirm registration!",
-                message=f"Hi, {user.nickname}! Follow this link {confirmation_url}",
+                message=f"Hi, {user.nickname}! Follow this link {confirmation_register_url}",
                 from_email="Bicos-Abricos@yandex.ru",
                 recipient_list=[user.email, ]
             )
@@ -51,16 +51,72 @@ class RegisterView(APIView):
 class RegisterConfirmView(APIView):
     permission_classes = [AllowAny]
 
-    def get(self, request, uid, token):
-        user = get_object_or_404(CustomUser, pk=uid)
+    @extend_schema(
+        request=None,
+        responses={200: UserSerializer(many=True)},
+    )
+    def get(self, request, pk, token):
+        user = get_object_or_404(CustomUser, pk=pk)
 
         if confirmation_token.check_token(user, token):
             user.is_active = True
             user.save()
-            return Response({"message": "Email successfully verified. You can now log in."},
+            return Response({"message": "Email successfully verified!"},
                             status=status.HTTP_200_OK)
 
-        return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"error": "Invalid token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordReset(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=UserSerializer,
+        responses={200: {"message": "Password reset link sent to your email"}},
+    )
+    def post(self, request):
+        email = request.data.get("email")
+        user = CustomUser.objects.filter(email=email).first()
+
+        if user:
+            token = confirmation_token.make_token(user)
+
+            reset_password_url = request.build_absolute_uri(
+                reverse('password_reset_confirm', kwargs={'pk': user.pk, 'token': token})
+            )
+
+            send_mail(
+                subject="Password Reset Request",
+                message=f"Hi, {user.nickname}! To reset your password, follow this link: {reset_password_url}",
+                from_email="Bicos-Abricos@yandex.ru",
+                recipient_list=[user.email],
+            )
+            return Response({"message": "Password reset link sent to your email"}, status=status.HTTP_200_OK)
+
+        return Response({"error": "User not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ResetPasswordConfirm(APIView):
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        request=UserSerializer,
+        responses={201: {"message": "Password reset successful!"}},
+    )
+    def post(self, request, token, pk):
+        user = get_object_or_404(CustomUser, pk=pk)
+
+        if not confirmation_token.check_token(user, token):
+            return Response({"error": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
+
+        new_password = request.data.get("new_password")
+
+        if new_password:
+            user.set_password(new_password)
+            user.save()
+            return Response({"message": "Password reset successful!"}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Try again"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CurrentUserView(APIView):
