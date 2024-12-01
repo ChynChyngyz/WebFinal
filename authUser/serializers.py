@@ -8,7 +8,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         # указывается все поля модели, которые должны быть в JSON
-        fields = ['id', 'is_active', 'nickname', 'email', 'first_name', 'last_name', 'password', 'role']
+        fields = ['id', 'is_active', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
+                  'password', 'description', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):
@@ -22,7 +23,14 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = get_user_model()
-        fields = ['nickname', 'email', 'first_name', 'last_name', 'password', 'role']
+        fields = ['id', 'is_staff', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
+                  'password', 'speciality', 'speciality', 'education', 'description', 'role']
+
+    # обязательные поля для доктора
+    speciality = serializers.CharField(required=True)
+    experience = serializers.IntegerField(required=True)
+    description = serializers.CharField(required=True)
+    education = serializers.CharField(required=True)
 
     @staticmethod
     def create(validated_data, **kwargs):

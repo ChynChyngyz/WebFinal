@@ -5,7 +5,7 @@ from django import forms
 from web import settings
 from django.core.mail import send_mail
 
-from appointments.models import Appointment
+from models import Appointment
 
 
 def send_email_for_patient(email, appointment: Appointment):

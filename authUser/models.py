@@ -9,10 +9,8 @@ class CustomUserManager(BaseUserManager):
         """
         Создаёт и сохраняет пользователя с указанным email, nickname и паролем.
         """
-        if not email:
-            raise ValueError('Users must have an email address')
-        if not nickname:
-            raise ValueError('Users must have a nickname')
+        if not email or not nickname or not phone:
+            raise ValueError('Incorrect registration')
 
         email = self.normalize_email(email)
         extra_fields.setdefault('is_active', True)
@@ -37,27 +35,43 @@ class CustomUserManager(BaseUserManager):
         """
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(email, nickname, password, **extra_fields, role='Admin')
 
-    def create_doctor(self, email, nickname, password=None, **extra_fields):
+        admin = self.create_user(email, nickname, password, **extra_fields, role='Admin')
+
+        return admin
+
+    def create_doctor(self, email, nickname, password=None, speciality=None, experience=None, description=None,
+                      education=None, **extra_fields):
         """
         Создаёт и сохраняет пользователя с ролью 'Doctor'.
         """
+        if not speciality or not education or education:
+            raise ValueError('Incorrect registration')
+
         extra_fields.setdefault('is_staff', True)
-        return self.create_user(email, nickname, password, role='Doctor', **extra_fields)
+
+        doctor = self.create_user(email, nickname, password, role='Doctor', **extra_fields)
+
+        doctor.speciality = speciality
+        doctor.experience = experience
+        doctor.description = description
+        doctor.education = education
+        doctor.save(using=self._db)
+
+        return doctor
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     DoesNotExist = None
     ROLE_CHOICES = [
-        # ('Admin', 'Администратор'),
+        ('Admin', 'Администратор'),
         ('Doctor', 'Доктор'),
         ('User', 'Пользователь'),
     ]
 
     email = models.EmailField(unique=True, verbose_name='Электронная почта')
     nickname = models.CharField(max_length=30, unique=True, verbose_name='Никнейм')
-    phone = models.CharField(max_length=15, blank=True, null=True, verbose_name='Телефон')
+    phone = models.CharField(max_length=15, verbose_name='Телефон')
     date_of_birth = models.DateField(blank=True, null=True, verbose_name='Дата рождения')
     avatar = models.ImageField(upload_to='users_avatar/', blank=True, null=True, verbose_name='Аватар пользователя')
 

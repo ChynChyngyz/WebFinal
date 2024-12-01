@@ -1,10 +1,7 @@
 from django.urls import path
 
-from appointments.apps import AppointmentsConfig
-from appointments.views import (AppointmentCreateView, AppointmentListView, AppointmentUpdateView, AppointmentDeleteView,
-                                TimetableListView, TimetableCreateView, TimetableUpdateView, TimetableDeleteView)
-
-app_name = AppointmentsConfig.name
+from .views import (AppointmentCreateView, AppointmentListView, AppointmentUpdateView, AppointmentDeleteView,
+                    TimetableListView, TimetableCreateView, TimetableUpdateView, TimetableDeleteView)
 
 urlpatterns = [
     path('appointment-list', AppointmentListView.as_view(), name='appointment_list'),
