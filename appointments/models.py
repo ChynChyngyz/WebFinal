@@ -28,6 +28,7 @@ class Appointment(models.Model):
         verbose_name='пациент',
         related_name='appointments_as_user'
     )
+
     doctor = models.ForeignKey(
         CustomUser,
         on_delete=models.SET_NULL,
@@ -40,6 +41,8 @@ class Appointment(models.Model):
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
     status_of_appointment = models.CharField(max_length=20, choices=STATUS_CHOICES, default=WAITING)
+    doctor_id = models.ManyToManyField(CustomUser, verbose_name='Доктор', limit_choices_to={'role': 'Doctor'},
+                                       related_name='appointments')
     date_created = models.DateTimeField(auto_now_add=True)
     price = models.FloatField(verbose_name='Цена')
 

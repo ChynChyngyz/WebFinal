@@ -29,8 +29,8 @@ class AppointmentListView(APIView):
         """
         Метод для получения списка записей к врачу.
         """
-        specialities = Appointment.objects.all()  # Получаем все специализации
-        serializer = AppointmentSerializer(specialities, many=True)  # Сериализуем данные
+        appointment = Appointment.objects.all()  # Получаем все специализации
+        serializer = AppointmentSerializer(appointment, many=True)  # Сериализуем данные
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -53,7 +53,12 @@ class AppointmentCreateView(APIView):
         serializer = AppointmentSerializer(data=data)
 
         if serializer.is_valid():
-            serializer.save()
+            appointment = serializer.save()
+
+            doctor_id = request.data.get('doctor_id')
+            if doctor_id:
+                appointment.doctor_id.set(doctor_id)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -75,14 +80,19 @@ class AppointmentUpdateView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
         try:
-            speciality = Appointment.objects.get(pk=pk)  # Нахождение специализации
+            appointment = Appointment.objects.get(pk=pk)
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AppointmentSerializer(speciality, data=request.data, partial=True)
+        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()
+            appointment = serializer.save()
+
+            doctor_id = request.data.get('doctor_id')
+            if doctor_id:
+                appointment.doctor_id.set(doctor_id)
+
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -104,12 +114,12 @@ class AppointmentDeleteView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
         try:
-            speciality = Appointment.objects.get(pk=pk)
+            appointment = Appointment.objects.get(pk=pk)
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AppointmentSerializer(speciality, data=request.data, partial=True)
-        speciality.delete()
+        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
+        appointment.delete()
         return Response({"message": "Appointment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
@@ -153,8 +163,8 @@ class TimetableListView(APIView):
         Метод для получения списка записей к врачу.
         """
         specialities = Timetable.objects.all()
-        serializer = TimetableSerializer(specialities, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        timetable = TimetableSerializer(specialities, many=True)
+        return Response(timetable.data, status=status.HTTP_200_OK)
 
 
 class TimetableUpdateView(APIView):
@@ -173,11 +183,11 @@ class TimetableUpdateView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
         try:
-            speciality = Timetable.objects.get(pk=pk)
+            timetable = Timetable.objects.get(pk=pk)
         except Timetable.DoesNotExist:
             return Response({"error": "Timetable not found."}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = TimetableSerializer(speciality, data=request.data, partial=True)
+        serializer = TimetableSerializer(timetable, data=request.data, partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -202,10 +212,10 @@ class TimetableDeleteView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
         try:
-            speciality = Timetable.objects.get(pk=pk)
+            timetable = Timetable.objects.get(pk=pk)
         except Timetable.DoesNotExist:
             return Response({"error": "Timetable not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = TimetableSerializer(speciality, data=request.data, partial=True)
-        speciality.delete()
+        serializer = TimetableSerializer(timetable, data=request.data, partial=True)
+        timetable.delete()
         return Response({"message": "Timetable deleted successfully."}, status=status.HTTP_204_NO_CONTENT)

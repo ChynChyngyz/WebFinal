@@ -1,4 +1,5 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
 
@@ -24,7 +25,7 @@ class DoctorSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         fields = ['id', 'is_staff', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
-                  'password', 'speciality', 'speciality', 'education', 'description', 'role']
+                  'password', 'speciality', 'speciality', 'education', 'description', 'experience', 'role']
 
     # обязательные поля для доктора
     speciality = serializers.CharField(required=True)
@@ -35,4 +36,11 @@ class DoctorSerializer(serializers.ModelSerializer):
     @staticmethod
     def create(validated_data, **kwargs):
         validated_data.setdefault('role', 'Doctor')
+        password = validated_data.get('password')
+
+        try:
+            validate_password(password)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+
         return get_user_model().objects.create_user(**validated_data)
