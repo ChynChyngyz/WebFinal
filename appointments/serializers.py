@@ -2,23 +2,27 @@ from rest_framework import serializers
 from .models import Appointment, Timetable
 from authUser.models import CustomUser
 
+from speciality.serializers import SpecialitySerializer
+
+
+class DoctorDetailsSerializer(serializers.ModelSerializer):
+
+    speciality = SpecialitySerializer(read_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'first_name', 'last_name', 'nickname', 'phone', 'speciality', 'education', 'description']
+
 
 class UserDetailsSerializer(serializers.ModelSerializer):
     """
     Сериализатор для пользователя.
     """
+    doctor_details = DoctorDetailsSerializer(source='doctor', many=True, read_only=True)
+
     class Meta:
         model = CustomUser
         fields = ['id', 'first_name', 'last_name', 'nickname', 'phone']
-
-
-class DoctorDetailsSerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для доктора.
-    """
-    class Meta:
-        model = CustomUser
-        fields = ['id', 'first_name', 'last_name', 'nickname', 'phone', 'speciality', 'education', 'description']
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
