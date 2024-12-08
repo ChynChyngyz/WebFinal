@@ -1,4 +1,5 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -20,6 +21,7 @@ class ServiceListView(APIView):
     @extend_schema(
         request=None,
         responses={200: ServiceSerializer(many=True)},
+        tags=["Service"],
     )
     def get(self, request):
         """
@@ -39,6 +41,7 @@ class ServiceDetailView(APIView):
     @extend_schema(
         request=None,
         responses={200: ServiceSerializer(many=True)},
+        tags=["Service"],
     )
     def get(self, request, pk):
         try:
@@ -88,7 +91,9 @@ class ServiceCreateView(APIView):
     """
     @extend_schema(
         request=ServiceSerializer,
+        parameters=[ServiceSerializer],
         responses={201: {"message": "Service created successful"}},
+        tags=["Service"],
     )
     def post(self, request):
         """
@@ -116,7 +121,14 @@ class ServiceUpdateView(APIView):
 
     @extend_schema(
         request=ServiceSerializer,
+        parameters=[ServiceSerializer],
+        # parameters=[
+        #     OpenApiParameter('title', OpenApiTypes.STR, description='Название', location=OpenApiParameter.PATH, ),
+        #     OpenApiParameter('description', OpenApiTypes.STR, description='Описание', location=OpenApiParameter.PATH),
+        #     OpenApiParameter('price', OpenApiTypes.STR, description='Цена', location=OpenApiParameter.PATH),
+        # ],
         responses={201: {"message": "Service updated successful"}},
+        tags=["Service"],
     )
     def put(self, request, pk):
         if request.user.role != 'Admin':
@@ -146,6 +158,7 @@ class ServiceDeleteView(APIView):
     @extend_schema(
         request=ServiceSerializer,
         responses={204: {"message": "Service deleted successful"}},
+        tags=["Service"],
     )
     def delete(self, request, pk):
         if request.user.role != 'Admin':

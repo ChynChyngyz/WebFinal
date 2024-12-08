@@ -12,42 +12,26 @@ class Appointment(models.Model):
     DoesNotExist = None
     objects = None
 
-    WAITING = 'WAITING'
-    COMPLETED = 'COMPLETED'
-    CANCELLED = 'CANCELLED'
-
     STATUS_CHOICES = [
-        (WAITING, 'ожидание приема'),
-        (COMPLETED, 'прием оказан'),
-        (CANCELLED, 'прием отменен'),
+        ('WAITING', 'Ожидание'),
+        ('COMPLETED', 'Завершен'),
+        ('CANCELLED', 'Отменен'),
     ]
 
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        verbose_name='пациент',
-        related_name='appointments_as_user'
-    )
 
-    doctor = models.ForeignKey(
-        CustomUser,
-        on_delete=models.SET_NULL,
-        verbose_name='врач',
-        related_name='appointments_as_doctor',
-        null=True
-    )
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_user', verbose_name='Пользователь')  # Поле для связи с пользователем
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_doctor', verbose_name='Доктор')  # Поле для связи с доктором
+    print(user, doctor)
 
     # service = models.ForeignKey(Service, on_delete=models.CASCADE, verbose_name='услуга')
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
-    status_of_appointment = models.CharField(max_length=20, choices=STATUS_CHOICES, default=WAITING)
-    doctor_id = models.ManyToManyField(CustomUser, verbose_name='Доктор', limit_choices_to={'role': 'Doctor'},
-                                       related_name='appointments')
+    status_of_appointment = models.CharField(max_length=20, choices=STATUS_CHOICES, default='WAITING')
     date_created = models.DateTimeField(auto_now_add=True)
     price = models.FloatField(verbose_name='Цена')
 
     def __init__(self, *args, **kwargs):
-        super().__init__(args, kwargs)
+        super().__init__(*args, **kwargs)
         self.service = None
 
     def __str__(self):

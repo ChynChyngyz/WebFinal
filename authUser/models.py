@@ -33,22 +33,28 @@ class CustomUserManager(BaseUserManager):
         """
         Создаёт и сохраняет суперпользователя.
         """
+        extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
 
-        admin = self.create_user(email, nickname, password, **extra_fields, role='Admin')
+        superuser = self.create_user(email, nickname, password, **extra_fields, role='Admin')
 
-        return admin
+        superuser.is_staff = True
+        superuser.is_superuser = True
+        superuser.save(using=self._db)
+
+        return superuser
 
     def create_doctor(self, email, nickname, password=None, speciality=None, experience=None, description=None,
                       education=None, **extra_fields):
         """
         Создаёт и сохраняет пользователя с ролью 'Doctor'.
         """
-        if not speciality or not education or education:
+        if not speciality or not education:
             raise ValueError('Incorrect registration')
 
-        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_active', True)
+        extra_fields.setdefault('is_staff', False)
 
         doctor = self.create_user(email, nickname, password, role='Doctor', **extra_fields)
 

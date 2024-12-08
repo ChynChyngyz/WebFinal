@@ -1,6 +1,6 @@
 from django.db import models
 from speciality.models import Speciality
-from authUser.models import CustomUser  # CustomUserManager
+from authUser.models import CustomUser
 
 
 class Service(models.Model):
@@ -10,9 +10,14 @@ class Service(models.Model):
     DoesNotExist = None
     objects = None
 
+    doctor = models.ForeignKey(
+        CustomUser,
+        verbose_name='Доктор',
+        on_delete=models.CASCADE,
+        related_name='services'
+    )
+
     title = models.CharField(max_length=100, verbose_name='Название услуги')
-    doctor = models.ForeignKey(CustomUser, verbose_name='Доктор', on_delete=models.CASCADE,
-                               related_name='services')
     image = models.ImageField(upload_to='image_service/', verbose_name='Изображение', blank=True, null=True)
     price = models.PositiveIntegerField(verbose_name='Цена услуги')
     speciality = models.ForeignKey(Speciality, on_delete=models.SET_NULL, verbose_name='Специализация', blank=True,
@@ -25,3 +30,4 @@ class Service(models.Model):
     class Meta:
         verbose_name = 'Услуга'
         verbose_name_plural = 'Услуги'
+        unique_together = ('doctor', 'title')

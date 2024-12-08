@@ -11,7 +11,7 @@ from .serializers import UserSerializer, DoctorSerializer
 from .models import CustomUser
 from .utils import confirmation_token
 
-from drf_spectacular.utils import extend_schema  # OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
 # from drf_spectacular.types import OpenApiTypes
 
 
@@ -20,7 +20,9 @@ class RegisterView(APIView):
 
     @extend_schema(
         request=UserSerializer,
+        parameters=[UserSerializer],
         responses={201: {"message": "User created successfully, please confirm registration"}},
+        tags=["Register"],
     )
     def post(self, request):
         # email, password, nickname = (request.data.get("email"), request.data.get("password"),
@@ -54,6 +56,7 @@ class RegisterConfirmView(APIView):
     @extend_schema(
         request=None,
         responses={200: UserSerializer(many=True)},
+        tags=["Register"],
     )
     def get(self, request, pk, token):
         user = get_object_or_404(CustomUser, pk=pk)
@@ -73,6 +76,7 @@ class PasswordReset(APIView):
     @extend_schema(
         request=UserSerializer,
         responses={200: {"message": "Password reset link sent to your email"}},
+        tags=["Password"],
     )
     def post(self, request):
         email = request.data.get("email")
@@ -101,7 +105,10 @@ class ResetPasswordConfirm(APIView):
 
     @extend_schema(
         request=UserSerializer,
+        parameters=[OpenApiParameter('new_password', OpenApiTypes.STR, description='Новый пароль',
+                                     location=OpenApiParameter.PATH, )],
         responses={201: {"message": "Password reset successful!"}},
+        tags=["Password"],
     )
     def post(self, request, token, pk):
         user = get_object_or_404(CustomUser, pk=pk)
@@ -125,6 +132,7 @@ class CurrentUserView(APIView):
     @extend_schema(
         request=None,
         responses={200: UserSerializer()},
+        tags=["Users"],
     )
     def get(self, request):
         serializer = UserSerializer(data=request.data)
@@ -145,6 +153,7 @@ class AllUsersView(APIView):
     @extend_schema(
         request=None,
         responses={200: UserSerializer(many=True)},
+        tags=["Users"],
     )
     def get(self, request):
         if request.user.role != 'Admin':
@@ -162,6 +171,7 @@ class DoctorView(APIView):
     @extend_schema(
         request=None,
         responses={200: DoctorSerializer(many=True)},
+        tags=["Users"],
     )
     def get(self, request):
         doctor = request.doctors
@@ -182,6 +192,7 @@ class DeleteUser(APIView):
     @extend_schema(
         request=None,
         responses={200: DoctorSerializer(many=True)},
+        tags=["Users"],
     )
     def delete(self, request, pk):
         if request.user.role != 'Admin':

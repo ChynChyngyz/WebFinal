@@ -1,6 +1,4 @@
-# from django.views.decorators.csrf import csrf_exempt
-
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiTypes, OpenApiParameter
 
 from rest_framework import status
 from rest_framework.views import APIView
@@ -8,13 +6,9 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from .models import Appointment, Timetable
-
-# from .forms import SpecialityForm
-
 from .serializers import AppointmentSerializer, TimetableSerializer
 
 
-# Класс для списка специализаций
 class AppointmentListView(APIView):
     """
     Класс для вывода списка записей к врачу.
@@ -24,13 +18,14 @@ class AppointmentListView(APIView):
     @extend_schema(
         request=None,
         responses={200: AppointmentSerializer(many=True)},
+        tags=["Appointments"]
     )
     def get(self, request):
         """
         Метод для получения списка записей к врачу.
         """
-        appointment = Appointment.objects.all()  # Получаем все специализации
-        serializer = AppointmentSerializer(appointment, many=True)  # Сериализуем данные
+        appointments = Appointment.objects.all()  # Получаем все записи
+        serializer = AppointmentSerializer(appointments, many=True)  # Сериализуем данные
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -39,7 +34,9 @@ class AppointmentCreateView(APIView):
 
     @extend_schema(
         request=AppointmentSerializer,
-        responses={201: {"message": "Appointment created successful"}},
+        parameters=[AppointmentSerializer],
+        responses={201: {"message": "Appointment created successfully"}},
+        tags=["Appointments"]
     )
     def post(self, request):
         """
@@ -49,16 +46,10 @@ class AppointmentCreateView(APIView):
             return Response({"error": "Access denied. Only admin can perform this action"},
                             status=status.HTTP_403_FORBIDDEN)
 
-        data = request.data
-        serializer = AppointmentSerializer(data=data)
+        serializer = AppointmentSerializer(data=request.data)
 
         if serializer.is_valid():
-            appointment = serializer.save()
-
-            doctor_id = request.data.get('doctor_id')
-            if doctor_id:
-                appointment.doctor_id.set(doctor_id)
-
+            serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -69,7 +60,9 @@ class AppointmentUpdateView(APIView):
 
     @extend_schema(
         request=AppointmentSerializer,
-        responses={201: {"message": "Appointment updated successful"}},
+        parameters=[AppointmentSerializer],
+        responses={201: {"message": "Appointment updated successfully"}},
+        tags=["Appointments"]
     )
     def put(self, request, pk):
         """
@@ -87,13 +80,8 @@ class AppointmentUpdateView(APIView):
         serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
 
         if serializer.is_valid():
-            appointment = serializer.save()
-
-            doctor_id = request.data.get('doctor_id')
-            if doctor_id:
-                appointment.doctor_id.set(doctor_id)
-
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -103,7 +91,8 @@ class AppointmentDeleteView(APIView):
 
     @extend_schema(
         request=AppointmentSerializer,
-        responses={204: {"message": "Appointment deleted successful"}},
+        responses={204: {"message": "Appointment deleted successfully"}},
+        tags=["Appointments"]
     )
     def delete(self, request, pk):
         """
@@ -118,7 +107,6 @@ class AppointmentDeleteView(APIView):
         except Appointment.DoesNotExist:
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
         appointment.delete()
         return Response({"message": "Appointment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
 
@@ -127,8 +115,9 @@ class TimetableCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=AppointmentSerializer,
-        responses={201: {"message": "Timetable created successful"}},
+        request=TimetableSerializer,
+        responses={201: {"message": "Timetable created successfully"}},
+        tags=["Timetables"]
     )
     def post(self, request):
         """
@@ -138,8 +127,7 @@ class TimetableCreateView(APIView):
             return Response({"error": "Access denied. Only admin can perform this action"},
                             status=status.HTTP_403_FORBIDDEN)
 
-        data = request.data
-        serializer = TimetableSerializer(data=data)
+        serializer = TimetableSerializer(data=request.data)
 
         if serializer.is_valid():
             serializer.save()
@@ -150,33 +138,37 @@ class TimetableCreateView(APIView):
 
 class TimetableListView(APIView):
     """
-    Класс для вывода списка дней.
+    Класс для вывода списка дней приема.
     """
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=None,
         responses={200: TimetableSerializer(many=True)},
+        tags=["Timetables"]
     )
     def get(self, request):
         """
-        Метод для получения списка записей к врачу.
+        Метод для получения списка расписаний.
         """
-        specialities = Timetable.objects.all()
-        timetable = TimetableSerializer(specialities, many=True)
-        return Response(timetable.data, status=status.HTTP_200_OK)
+        timetables = Timetable.objects.all()
+        serializer = TimetableSerializer(timetables, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TimetableUpdateView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=AppointmentSerializer,
-        responses={201: {"message": "Timetable updated successful"}},
+        request=TimetableSerializer,
+        parameters=[OpenApiParameter('days_of_week', OpenApiTypes.INT, description='Дни недели',
+                                     location=OpenApiParameter.PATH, )],
+        responses={200: {"message": "Timetable updated successfully"}},
+        tags=["Timetables"]
     )
     def put(self, request, pk):
         """
-        Метод для обновления дней.
+        Метод для обновления расписания.
         """
         if request.user.role != 'Admin':
             return Response({"error": "Access denied. Only admin can perform this action"},
@@ -191,7 +183,7 @@ class TimetableUpdateView(APIView):
 
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -200,12 +192,13 @@ class TimetableDeleteView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=AppointmentSerializer,
-        responses={204: {"message": "Timetable deleted successful"}},
+        request=TimetableSerializer,
+        responses={204: {"message": "Timetable deleted successfully"}},
+        tags=["Timetables"]
     )
     def delete(self, request, pk):
         """
-        Метод для удаления дней.
+        Метод для удаления дня приема.
         """
         if request.user.role != 'Admin':
             return Response({"error": "Access denied. Only admin can perform this action"},
@@ -216,6 +209,5 @@ class TimetableDeleteView(APIView):
         except Timetable.DoesNotExist:
             return Response({"error": "Timetable not found"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = TimetableSerializer(timetable, data=request.data, partial=True)
         timetable.delete()
         return Response({"message": "Timetable deleted successfully."}, status=status.HTTP_204_NO_CONTENT)

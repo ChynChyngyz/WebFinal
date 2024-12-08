@@ -1,4 +1,5 @@
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,8 +16,9 @@ class SpecialityListView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request=None,  # none потому что GET-запрос не имеет тела
+        request=None,
         responses={200: SpecialitySerializer(many=True)},
+        tags=["Speciality"],
     )
     def get(self, request):
         """
@@ -47,7 +49,9 @@ class SpecialityCreateView(APIView):
 
     @extend_schema(
         request=SpecialitySerializer,
+        parameters=[SpecialitySerializer],
         responses={201: {"message": "Speciality created successful"}},
+        tags=["Speciality"],
     )
     def post(self, request):
         """
@@ -72,7 +76,13 @@ class SpecialityUpdateView(APIView):
 
     @extend_schema(
         request=SpecialitySerializer,
+        parameters=[SpecialitySerializer],
+        # parameters=[
+        #     OpenApiParameter('speciality_name', OpenApiTypes.STR, description='Название', location=OpenApiParameter.PATH,),
+        #     OpenApiParameter('description', OpenApiTypes.STR, description='Описание', location=OpenApiParameter.PATH)
+        # ],
         responses={201: {"message": "Speciality updated successful"}},
+        tags=["Speciality"],
     )
     def put(self, request, pk):
         """
@@ -83,7 +93,7 @@ class SpecialityUpdateView(APIView):
                             status=status.HTTP_403_FORBIDDEN)
 
         try:
-            speciality = Speciality.objects.get(pk=pk)  # Нахождение специализации
+            speciality = Speciality.objects.get(pk=pk)
         except Speciality.DoesNotExist:
             return Response({"error": "Speciality not found."}, status=status.HTTP_404_NOT_FOUND)
 
@@ -101,7 +111,9 @@ class SpecialityDeleteView(APIView):
 
     @extend_schema(
         request=SpecialitySerializer,
+        parameters=[OpenApiParameter('id', OpenApiTypes.INT, description='ID специализации', location=OpenApiParameter.PATH)],
         responses={204: {"message": "Speciality deleted successful"}},
+        tags=["Speciality"],
     )
     def delete(self, request, pk):
         """

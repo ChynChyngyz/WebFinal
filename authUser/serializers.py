@@ -9,14 +9,21 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()
         # указывается все поля модели, которые должны быть в JSON
-        fields = ['id', 'is_active', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
-                  'password', 'description', 'role']
+        fields = ['id', 'is_active', 'is_staff', 'is_superuser', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone',
+                  'date_of_birth', 'password', 'description', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):
-        # Создаём пользователя, передавая дополнительные данные
+        password = validated_data.pop('password')
+
+        try:
+            validate_password(password)
+        except Exception as e:
+            raise serializers.ValidationError(str(e))
+
         validated_data.setdefault('role', 'User')
-        return get_user_model().objects.create_user(**validated_data)
+        user = get_user_model().objects.create_user(password=password, **validated_data)
+        return user
 
 
 class DoctorSerializer(serializers.ModelSerializer):
@@ -27,7 +34,6 @@ class DoctorSerializer(serializers.ModelSerializer):
         fields = ['id', 'is_staff', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
                   'password', 'speciality', 'speciality', 'education', 'description', 'experience', 'role']
 
-    # обязательные поля для доктора
     speciality = serializers.CharField(required=True)
     experience = serializers.IntegerField(required=True)
     description = serializers.CharField(required=True)
@@ -35,12 +41,13 @@ class DoctorSerializer(serializers.ModelSerializer):
 
     @staticmethod
     def create(validated_data, **kwargs):
-        validated_data.setdefault('role', 'Doctor')
-        password = validated_data.get('password')
+        password = validated_data.pop('password')
 
         try:
             validate_password(password)
         except Exception as e:
             raise serializers.ValidationError(str(e))
 
-        return get_user_model().objects.create_user(**validated_data)
+        validated_data.setdefault('role', 'Doctor')
+        user = get_user_model().objects.create_user(password=password, **validated_data)
+        return user

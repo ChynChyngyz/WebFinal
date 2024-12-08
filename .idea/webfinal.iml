@@ -13,6 +13,8 @@
     <option name="namespacePackageFolders">
       <list>
         <option value="$MODULE_DIR$/service" />
+        <option value="$MODULE_DIR$/appointments" />
+        <option value="$MODULE_DIR$/authUser" />
       </list>
     </option>
   </component>
