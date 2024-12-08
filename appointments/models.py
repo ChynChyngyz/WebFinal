@@ -44,7 +44,6 @@ class Appointment(models.Model):
     def delete(self, *args, **kwargs):
         self.status_of_appointment = 'CANCELLED'
         self.save()
-        super().delete(*args, **kwargs)
 
 
 class Timetable(models.Model):

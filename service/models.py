@@ -17,11 +17,16 @@ class Service(models.Model):
         related_name='services'
     )
 
+    speciality = models.ForeignKey(
+        Speciality,
+        on_delete=models.SET_NULL,
+        verbose_name='Специализация',
+        blank=True, null=True
+    )
+
     title = models.CharField(max_length=100, verbose_name='Название услуги')
     image = models.ImageField(upload_to='image_service/', verbose_name='Изображение', blank=True, null=True)
     price = models.PositiveIntegerField(verbose_name='Цена услуги')
-    speciality = models.ForeignKey(Speciality, on_delete=models.SET_NULL, verbose_name='Специализация', blank=True,
-                                   null=True)
     description = models.TextField(verbose_name='Описание')
 
     def __str__(self):

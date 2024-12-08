@@ -86,7 +86,7 @@ class AppointmentUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class AppointmentDeleteView(APIView):
+class AppointmentCancelView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -108,7 +108,7 @@ class AppointmentDeleteView(APIView):
             return Response({"error": "Appointment not found"}, status=status.HTTP_404_NOT_FOUND)
 
         appointment.delete()
-        return Response({"message": "Appointment deleted successfully."}, status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Appointment canceled successfully."}, status=status.HTTP_204_NO_CONTENT)
 
 
 class TimetableCreateView(APIView):

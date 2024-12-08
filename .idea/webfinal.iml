@@ -15,6 +15,7 @@
         <option value="$MODULE_DIR$/service" />
         <option value="$MODULE_DIR$/appointments" />
         <option value="$MODULE_DIR$/authUser" />
+        <option value="$MODULE_DIR$/speciality" />
       </list>
     </option>
   </component>
