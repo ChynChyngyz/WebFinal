@@ -25,9 +25,6 @@ class ServiceSerializer(serializers.ModelSerializer):
 
     @extend_schema_field(serializers.URLField)
     def get_image_url(self, obj):
-        """
-        Возвращаем полный URL изображения для сериализатора
-        """
         request = self.context.get('request')
         if obj.image and request:
             return request.build_absolute_uri(obj.image.url)

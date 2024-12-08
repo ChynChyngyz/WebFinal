@@ -4,9 +4,7 @@ from .models import Speciality
 
 
 class SpecialitySerializer(serializers.ModelSerializer):
-    """
-    Сериализатор для модели Speciality
-    """
+
     class Meta:
         model = Speciality
         fields = ['id', 'speciality_name', 'description', 'image', 'image_url']

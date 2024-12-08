@@ -2,14 +2,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
-from speciality.models import Speciality
-
-
-class SpecialitySerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Speciality
-        fields = ['id', 'speciality_name', 'description']
+from speciality.serializers import SpecialitySerializer
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -33,6 +26,15 @@ class UserSerializer(serializers.ModelSerializer):
         validated_data.setdefault('role', 'User')
         user = get_user_model().objects.create_user(password=password, **validated_data)
         return user
+
+    def to_representation(self, instance):
+
+        data = super().to_representation(instance)
+
+        if instance.role != 'Doctor':
+            data.pop('doctor_speciality', None)
+
+        return data
 
 
 class DoctorSerializer(serializers.ModelSerializer):
