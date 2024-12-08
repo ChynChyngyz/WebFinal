@@ -21,6 +21,7 @@ class Service(models.Model):
         Speciality,
         on_delete=models.SET_NULL,
         verbose_name='Специализация',
+        related_name='speciality',
         blank=True, null=True
     )
 

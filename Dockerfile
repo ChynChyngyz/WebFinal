@@ -1,10 +1,8 @@
-FROM python:3
+FROM python:3.11.9-slim
 
-ENV PYTHONUNBUFFERED 1
+COPY requirements.txt requirements.txt
+RUN pip install -r requirements.txt
 
-WORKDIR /app
+COPY . .
 
-COPY . /app
-
-RUN pip install -r /app/requirements.txt
-
+CMD [ "python", "main.py" ]

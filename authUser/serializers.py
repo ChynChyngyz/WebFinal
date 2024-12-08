@@ -2,15 +2,24 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
 
+from speciality.models import Speciality
+
+
+class SpecialitySerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Speciality
+        fields = ['id', 'speciality_name', 'description']
+
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    doctor_speciality = SpecialitySerializer(source='speciality', read_only=True)
 
     class Meta:
         model = get_user_model()
-        # указывается все поля модели, которые должны быть в JSON
-        fields = ['id', 'is_active', 'is_staff', 'is_superuser', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone',
-                  'date_of_birth', 'password', 'description', 'role']
+        fields = ['id', 'is_staff', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
+                  'password', 'speciality', 'doctor_speciality', 'education', 'description', 'experience', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):
@@ -28,16 +37,12 @@ class UserSerializer(serializers.ModelSerializer):
 
 class DoctorSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    doctor_speciality = SpecialitySerializer(source='speciality', read_only=True)
 
     class Meta:
         model = get_user_model()
         fields = ['id', 'is_staff', 'avatar', 'nickname', 'email', 'first_name', 'last_name', 'phone', 'date_of_birth',
-                  'password', 'speciality', 'speciality', 'education', 'description', 'experience', 'role']
-
-    speciality = serializers.CharField(required=True)
-    experience = serializers.IntegerField(required=True)
-    description = serializers.CharField(required=True)
-    education = serializers.CharField(required=True)
+                  'password', 'speciality', 'doctor_speciality', 'education', 'description', 'experience', 'role']
 
     @staticmethod
     def create(validated_data, **kwargs):

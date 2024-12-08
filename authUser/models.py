@@ -2,13 +2,12 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
+from speciality.models import Speciality
+
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, nickname, password=None, phone=None,
                     date_of_birth=None, avatar=None, role=None, **extra_fields):
-        """
-        Создаёт и сохраняет пользователя с указанным email, nickname и паролем.
-        """
         if not email or not nickname or not phone:
             raise ValueError('Incorrect registration')
 
@@ -85,7 +84,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=30, blank=True, verbose_name='Фамилия')
     date_joined = models.DateTimeField(default=timezone.now, verbose_name='Дата регистрации')
 
-    speciality = models.CharField(max_length=255, blank=True, null=True, verbose_name='Специализация')  # Для докторов
+    speciality = models.ForeignKey(Speciality,
+        on_delete=models.CASCADE,
+        verbose_name='Специализация',
+        related_name='users_speciality',
+        blank=True, null=True
+    )
     description = models.TextField(blank=True, null=True, verbose_name='Описание')  # Описание доктора
     experience = models.PositiveIntegerField(blank=True, null=True, verbose_name='Опыт (в годах)')  # Для докторов
     education = models.TextField(blank=True, null=True, verbose_name='Образование')

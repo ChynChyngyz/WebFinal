@@ -9,7 +9,6 @@ class SpecialitySerializer(serializers.ModelSerializer):
     """
     class Meta:
         model = Speciality
-        # указывается все поля модели, которые должны быть в JSON
         fields = ['id', 'speciality_name', 'description', 'image', 'image_url']
 
     @extend_schema_field(serializers.URLField)
@@ -22,5 +21,4 @@ class SpecialitySerializer(serializers.ModelSerializer):
             return request.build_absolute_uri(obj.image.url)
         return None
 
-    # добавление нового поле для изображения в формате URL
     image_url = serializers.SerializerMethodField('get_image_url')
