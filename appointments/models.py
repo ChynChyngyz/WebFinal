@@ -1,6 +1,6 @@
 from django.db import models
 
-# from services.models import Service
+from service.models import Service
 from authUser.models import CustomUser
 
 
@@ -19,11 +19,10 @@ class Appointment(models.Model):
     ]
 
 
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_user', verbose_name='Пользователь')  # Поле для связи с пользователем
-    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_doctor', verbose_name='Доктор')  # Поле для связи с доктором
-    print(user, doctor)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_user', verbose_name='Пользователь')
+    doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_doctor', verbose_name='Доктор')
 
-    # service = models.ForeignKey(Service, on_delete=models.CASCADE, verbose_name='услуга')
+    #service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='service_appointment', verbose_name='услуга')
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
     status_of_appointment = models.CharField(max_length=20, choices=STATUS_CHOICES, default='WAITING')

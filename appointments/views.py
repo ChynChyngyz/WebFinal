@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from .models import Appointment, Timetable
 from .serializers import AppointmentSerializer, TimetableSerializer
+from .utils import send_email_for_patient, send_email_for_patient_update, check_doctor_timetable_date
 
 
 class AppointmentListView(APIView):
@@ -49,7 +50,18 @@ class AppointmentCreateView(APIView):
         serializer = AppointmentSerializer(data=request.data)
 
         if serializer.is_valid():
-            serializer.save()
+            appointment_date = serializer.validated_data.get('date')
+            doctor = serializer.validated_data.get('doctor')
+
+            try:
+                timetable = check_doctor_timetable_date(appointment_date, doctor)
+
+            except Exception as e:
+                return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            appointment = serializer.save()
+            send_email_for_patient(appointment.user.email, appointment)
+            print(send_email_for_patient)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -65,9 +77,7 @@ class AppointmentUpdateView(APIView):
         tags=["Appointments"]
     )
     def put(self, request, pk):
-        """
-        Метод для обновления записи.
-        """
+
         if request.user.role != 'Admin':
             return Response({"error": "Access denied. Only admin can perform this action"},
                             status=status.HTTP_403_FORBIDDEN)
@@ -80,7 +90,8 @@ class AppointmentUpdateView(APIView):
         serializer = AppointmentSerializer(appointment, data=request.data, partial=True)
 
         if serializer.is_valid():
-            serializer.save()
+            appointment = serializer.save()
+            send_email_for_patient_update(appointment.user.email, appointment)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

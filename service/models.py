@@ -17,18 +17,22 @@ class Service(models.Model):
         related_name='services'
     )
 
-    speciality = models.ForeignKey(
+    speciality = models.ManyToManyField(
         Speciality,
-        on_delete=models.SET_NULL,
         verbose_name='Специализация',
         related_name='speciality',
-        blank=True, null=True
+        blank=True
     )
 
     title = models.CharField(max_length=100, verbose_name='Название услуги')
     image = models.ImageField(upload_to='image_service/', verbose_name='Изображение', blank=True, null=True)
     price = models.PositiveIntegerField(verbose_name='Цена услуги')
     description = models.TextField(verbose_name='Описание')
+
+    def get_specialities(self):
+        return ", ".join([str(speciality) for speciality in self.speciality.all()])
+
+    get_specialities.short_description = 'Специализации'
 
     def __str__(self):
         return f'{self.title}'
