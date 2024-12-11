@@ -53,7 +53,7 @@ class CustomUserManager(BaseUserManager):
             raise ValueError('Incorrect registration')
 
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('is_staff', False)
+        extra_fields.setdefault('is_staff', True)
 
         doctor = self.create_user(email, nickname, password, role='Doctor', **extra_fields)
 
@@ -90,12 +90,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         related_name='users_speciality',
         blank=True, null=True
     )
-    description = models.TextField(blank=True, null=True, verbose_name='Описание')  # Описание доктора
-    experience = models.PositiveIntegerField(blank=True, null=True, verbose_name='Опыт (в годах)')  # Для докторов
+
+    description = models.TextField(blank=True, null=True, verbose_name='Описание')
+    experience = models.PositiveIntegerField(blank=True, null=True, verbose_name='Опыт (в годах)')
     education = models.TextField(blank=True, null=True, verbose_name='Образование')
 
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='User', verbose_name='Роль')
-    is_active = models.BooleanField(default=False, verbose_name='Активен')  # default=True
+    is_active = models.BooleanField(default=False, verbose_name='Активен')
     is_staff = models.BooleanField(default=False, verbose_name='Сотрудник')
     is_superuser = models.BooleanField(default=False, verbose_name='Суперпользователь')
 

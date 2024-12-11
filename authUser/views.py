@@ -12,7 +12,6 @@ from .models import CustomUser
 from .utils import confirmation_token
 
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiTypes
-# from drf_spectacular.types import OpenApiTypes
 
 
 class RegisterView(APIView):

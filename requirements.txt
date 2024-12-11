@@ -1,7 +1,10 @@
 Django~=4.2.7
-django-cors-headers
-pillow~=10.3.0
-djangorestframework~=3.15.2
-djangorestframework-simplejwt
-drf-spectacular
-django-formset
+django-cors-headers==4.6.0
+pillow==10.3.0
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+drf-spectacular==0.28.0
+django-formset==1.5.5
+drf-yasg==1.21.8
+PyJWT==2.9.0
+requests

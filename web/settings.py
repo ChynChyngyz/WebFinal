@@ -100,7 +100,7 @@ SPECTACULAR_SETTINGS = {
     'TITLE': 'Medical Center',
     'DESCRIPTION': 'Medical Center',
     'VERSION': '1.0.0',
-    'SERVE_INCLUDE_SCHEMA': False,
+    'SERVE_INCLUDE_SCHEMA': True,
 }
 
 WSGI_APPLICATION = 'web.wsgi.application'
@@ -160,6 +160,8 @@ DEFAULT_FROM_EMAIL = 'Bicos-Abricos@yandex.ru'
 
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
+
+EXCHANGE_API_KEY = 'your_api_key_here'
 
 LANGUAGE_CODE = 'en-us'
 
