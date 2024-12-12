@@ -9,29 +9,29 @@ echo "Обновляем систему..."
 apt update && apt upgrade -y
 
 echo "Устанавливаем Docker, Docker Compose и другие зависимости..."
-apt install -y docker.io docker-compose git
+apt install -y docker.io git docker-compose
+
+chmod +x /usr/local/bin/docker-compose
 
 docker --version
 docker-compose --version
 
-if [ ! -d "/home/ubuntu/django" ]; then
-  echo "Клонируем проект..."
-  git clone https://your-repository-url.git /home/ubuntu/django
-else
-  echo "Проект уже существует, выполняем git pull..."
-  cd /home/ubuntu/django
-  git pull
-fi
+cd /var/www
 
-cd /home/ubuntu/django
+if [ -d "Dep" ]; then
+  echo "Проект уже существует, выполняем git pull..."
+  cd Dep
+  git pull
+else
+  echo "Клонируем проект..."
+  git clone https://github.com/ChynChyngyz/Dep.git .
+  cd Dep
+fi
 
 echo "Запускаем Docker Compose..."
 docker-compose up --build -d
 
-# Запуск Nginx (если он не запускается через docker-compose, можно запустить его вручную)
 echo "Перезапускаем Nginx..."
-systemctl restart nginx
+docker-compose restart nginx
 
 docker ps
-
-clear
