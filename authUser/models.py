@@ -29,9 +29,7 @@ class CustomUserManager(BaseUserManager):
         return user
 
     def create_superuser(self, email, nickname, password=None, **extra_fields):
-        """
-        Создаёт и сохраняет суперпользователя.
-        """
+
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -46,9 +44,7 @@ class CustomUserManager(BaseUserManager):
 
     def create_doctor(self, email, nickname, password=None, speciality=None, experience=None, description=None,
                       education=None, **extra_fields):
-        """
-        Создаёт и сохраняет пользователя с ролью 'Doctor'.
-        """
+
         if not speciality or not education:
             raise ValueError('Incorrect registration')
 
@@ -67,7 +63,9 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+
     DoesNotExist = None
+
     ROLE_CHOICES = [
         ('Admin', 'Администратор'),
         ('Doctor', 'Доктор'),

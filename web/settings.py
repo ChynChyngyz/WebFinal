@@ -1,12 +1,16 @@
 import os
+
+from dotenv import load_dotenv
 from pathlib import Path
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-v9b9_lk^sm07-np7m6^y+9^--m588bfd7nz2ukpd8li+=1niso'
+load_dotenv()
 
-DEBUG = True
+SECRET_KEY = os.getenv('SECRET_KEY', 'default-secret-key')
+
+DEBUG = os.getenv('DEBUG', False)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -16,7 +20,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 ROOT_URLCONF = 'web.urls'
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -25,14 +30,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'drf_spectacular',
+    'django_filters',
     'rest_framework',
-    'authUser',
     'corsheaders',
+
+    'authUser',
     'speciality',
     'appointments',
     'service',
-    'drf_spectacular',
 ]
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -45,11 +54,10 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+
 CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
+CORS_ALLOWED_ORIGINS = os.getenv('CORS_ALLOWED_ORIGINS', 'http://localhost:8000,http://127.0.0.1:8000').split(',')
+
 
 TEMPLATES = [
     {
@@ -69,6 +77,8 @@ TEMPLATES = [
 
 
 REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': int(os.getenv('PAGE_SIZE', 10)),
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
@@ -78,12 +88,14 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Medical Center',
     'DESCRIPTION': 'Medical Center',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': True,
 }
+
 
 WSGI_APPLICATION = 'web.wsgi.application'
 
@@ -122,29 +134,25 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-os.environ['REQUESTS_CA_BUNDLE'] = r'C:\path\to\cacert.pem'
 
-OPENWEATHERMAP_API_KEY = '47b7212871c1c98fc9db785df3d64b0e'
-CURRENCYLAYER_API_KEY = '83471218a7855be8d6135356'
+OPENWEATHERMAP_API_KEY = os.getenv('OPENWEATHERMAP_API_KEY')
+CURRENCYLAYER_API_KEY = os.getenv('CURRENCYLAYER_API_KEY')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.yandex.ru'
-EMAIL_PORT = 465
-EMAIL_HOST_USER = 'Bicos-Abricos@yandex.ru'
-EMAIL_HOST_PASSWORD = 'hndkcsdjxpybehjl'
-DEFAULT_FROM_EMAIL = 'Bicos-Abricos@yandex.ru'
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = int(os.getenv('EMAIL_PORT', 465))
+EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 EMAIL_USE_TLS = False
 EMAIL_USE_SSL = True
 
-EXCHANGE_API_KEY = 'your_api_key_here'
+LANGUAGE_CODE = os.getenv('LANGUAGE_CODE', 'en-us')
 
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
+TIME_ZONE = os.getenv('TIME_ZONE', 'UTC')
 
 USE_I18N = True
-
 USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

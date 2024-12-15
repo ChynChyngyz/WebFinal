@@ -8,3 +8,5 @@ django-formset==1.5.5
 drf-yasg==1.21.8
 PyJWT==2.9.0
 requests
+python-dotenv
+django-filter~=24.3

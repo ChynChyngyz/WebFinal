@@ -57,6 +57,8 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
     errors = []
 
     day_of_week = appointment_date.weekday()
+    now = datetime.datetime.now()
+    today = datetime.datetime.today().date()
 
     timetable = Timetable.objects.filter(doctor=doctor, day_of_visit=day_of_week).first()
 
@@ -64,7 +66,6 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
         errors.append(f"В выбранный день врач {doctor} не принимает пациентов.")
         return errors
 
-    # Получаем время работы клиники
     clinic_time = ClinicTime.objects.first()
 
     if not clinic_time:
@@ -74,13 +75,16 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
     if isinstance(appointment_time, str):
         appointment_time = datetime.datetime.strptime(appointment_time, "%H:%M").time()
 
-    if not (clinic_time.work_start_time <= appointment_time <= clinic_time.work_end_time):
+    if appointment_date < today:
+        errors.append(f"Выберите не прошедшие дни дату")
+
+    elif not (clinic_time.work_start_time <= appointment_time <= clinic_time.work_end_time):
         errors.append(f"В выбранное время клиника не работает.")
 
-    if clinic_time.lunch_start_time <= appointment_time < clinic_time.lunch_end_time:
+    elif clinic_time.lunch_start_time <= appointment_time < clinic_time.lunch_end_time:
         errors.append("Выбранное время попадает в обеденный перерыв.")
 
-    if clinic_time.break_start_time <= appointment_time < clinic_time.break_end_time:
+    elif clinic_time.break_start_time <= appointment_time < clinic_time.break_end_time:
         errors.append("Выбранное время попадает в полдник.")
 
     existing_appointments = Appointment.objects.filter(

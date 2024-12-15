@@ -14,15 +14,6 @@ class TimetableAdmin(admin.ModelAdmin):
 
     list_display = ('day_of_visit',)
 
-    # # Поиск по врачу
-    # search_fields = ['doctor__username', 'doctor__first_name', 'doctor__last_name']
-    #
-    # # Добавим фильтрацию по врачу и дню недели
-    # list_filter = ('doctor', 'day_of_week')
-    #
-    # # Если нужно, можно установить сортировку по дню недели или врачу
-    # ordering = ['doctor', 'day_of_week']
-
 
 @admin.register(ClinicTime)
 class ClinicTimeAdmin(admin.ModelAdmin):

@@ -1,5 +1,3 @@
-import datetime
-
 from rest_framework import serializers
 from .models import Appointment, Timetable, ClinicTime
 
@@ -17,12 +15,6 @@ class AppointmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Appointment
         fields = ['id', 'date', 'time', 'price', 'status_of_appointment', 'date_created', 'user', 'doctor', 'doctor_details', 'service_details', 'user_details']
-
-    def validate_date(self, value):
-        if value <= datetime.date.today():
-            raise serializers.ValidationError(
-                'Запись доступна только на завтра и далее. Вы не можете записаться на сегодня или в прошлое.')
-        return value
 
 
 class TimetableSerializer(serializers.ModelSerializer):
