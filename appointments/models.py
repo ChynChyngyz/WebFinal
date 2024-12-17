@@ -6,7 +6,7 @@ from authUser.models import CustomUser
 
 class DoctorWorkingTime(models.Model):
 
-    time = models.CharField(max_length=5, unique=True, verbose_name="Время")
+    time = models.CharField(max_length=5, unique=True, verbose_name="Время для рабочего часа")
     # doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="Доктор")
 
     def __str__(self):
@@ -15,6 +15,19 @@ class DoctorWorkingTime(models.Model):
     class Meta:
         verbose_name = 'Часы работы доктора'
         verbose_name_plural = 'Часы работы докторов'
+
+
+class AppointmentTime(models.Model):
+
+    appointment_time = models.CharField(max_length=5, unique=True, verbose_name="Время для записи")
+    # doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="Доктор")
+
+    def __str__(self):
+        return f'Часы работы доктора: {self.time}'
+
+    class Meta:
+        verbose_name = 'Часы для записи'
+        verbose_name_plural = 'Часы для записей'
 
 
 class Appointment(models.Model):

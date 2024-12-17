@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Appointment, Timetable, ClinicTime, DoctorWorkingTime
+from .models import Appointment, Timetable, ClinicTime, DoctorWorkingTime, AppointmentTime
 
 
 @admin.register(Appointment)
@@ -55,3 +55,9 @@ class ClinicTimeAdmin(admin.ModelAdmin):
 class DoctorWorkingTimeAdmin(admin.ModelAdmin):
 
     list_display = ['time']
+
+
+@admin.register(AppointmentTime)
+class AppointmentTimeAdmin(admin.ModelAdmin):
+
+    list_display = ['appointment_time']

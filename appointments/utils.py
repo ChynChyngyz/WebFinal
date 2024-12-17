@@ -8,14 +8,14 @@ from .models import Appointment, Timetable, ClinicTime
 
 
 def send_email_for_patient(email, appointment: Appointment):
-    service_name = appointment.service if appointment.service else 'Не указана'
+    # service_name = appointment.service if appointment.service else 'Не указана'
 
     send_mail(
         'Запись на прием',
         f'Вы записаны на прием к врачу: {appointment.doctor}\n'
         f'Дата: {appointment.date}\n'
         f'Время: {appointment.time}\n'
-        f'Услуга: {appointment.service}\n'
+        f'Услуга: {appointment.time}\n'
         f'Цена: {appointment.price} сом\n',
         settings.EMAIL_HOST_USER,
         [email]
@@ -57,7 +57,6 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
     errors = []
 
     day_of_week = appointment_date.weekday()
-    now = datetime.datetime.now()
     today = datetime.datetime.today().date()
 
     timetable = Timetable.objects.filter(doctor=doctor, day_of_visit=day_of_week).first()
@@ -78,7 +77,7 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
     if appointment_date < today:
         errors.append(f"Выберите не прошедшие дни дату")
 
-    elif not (clinic_time.work_start_time <= appointment_time <= clinic_time.work_end_time):
+    if not (clinic_time.work_start_time <= appointment_time <= clinic_time.work_end_time):
         errors.append(f"В выбранное время клиника не работает.")
 
     elif clinic_time.lunch_start_time <= appointment_time < clinic_time.lunch_end_time:
@@ -90,19 +89,28 @@ def is_valid_appointment_time(appointment_time, doctor, appointment_date):
     existing_appointments = Appointment.objects.filter(
         doctor=doctor,
         date=appointment_date,
+        time=appointment_time,
+        status_of_appointment__in=['WAITING', 'CONFIRMED']
     )
 
-    for appointment in existing_appointments:
+    if existing_appointments.exists():
+        errors.append(f"Врач {doctor} уже занят в выбранное время: {appointment_time}.")
 
-        appointment_start_time = datetime.datetime.combine(appointment_date, appointment.time)
-        appointment_end_time = appointment_start_time + timedelta(minutes=30)
+    doctor_work_times = timetable.doctor_work_time.all()
 
-        new_appointment_start = datetime.datetime.combine(appointment_date, appointment_time)
+    valid_time_found = False
 
-        print(f"Checking: New appointment time: {new_appointment_start}, Appointment start: {appointment_start_time}, Appointment end: {appointment_end_time}")
+    for doctor_work_time in doctor_work_times:
+        doctor_work_time_str = doctor_work_time.time if isinstance(doctor_work_time.time,
+                                                                   str) else doctor_work_time.time.strftime('%H:%M')
 
-        if new_appointment_start < appointment_end_time and new_appointment_start + timedelta(minutes=30) > appointment_start_time:
-            errors.append("Выбранное время пересекается с другой записью.")
+        doctor_work_time_obj = datetime.datetime.strptime(doctor_work_time_str, "%H:%M").time()
+
+        if doctor_work_time_obj == appointment_time:
+            valid_time_found = True
             break
+
+    if not valid_time_found:
+        errors.append(f"Врач {doctor} не работает в это время: {appointment_time}.")
 
     return errors
