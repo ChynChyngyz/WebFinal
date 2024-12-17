@@ -1,9 +1,16 @@
 from rest_framework import serializers
-from .models import Appointment, Timetable, ClinicTime
 
-from authUser.serializers import UserSerializer, DoctorSerializer
+from .models import Appointment, Timetable, ClinicTime, DoctorWorkingTime
 from authUser.models import CustomUser
+
 from service.serializers import ServiceSerializer
+from authUser.serializers import UserSerializer, DoctorSerializer
+
+
+class DoctorWorkingTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DoctorWorkingTime
+        fields = ['time']
 
 
 class AppointmentSerializer(serializers.ModelSerializer):
@@ -21,19 +28,42 @@ class TimetableSerializer(serializers.ModelSerializer):
     doctor_details = DoctorSerializer(source='doctor', read_only=True)
     doctor = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.filter(role="Doctor"))
 
+    time_work_0 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_1 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_2 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_3 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_4 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_5 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+    time_work_6 = DoctorWorkingTimeSerializer(many=True, read_only=True)
+
     class Meta:
         model = Timetable
-        fields = ['id', 'day_of_visit', 'doctor', 'doctor_details']
+        fields = ['id', 'doctor', 'doctor_details', 'time_work_0', 'time_work_1', 'time_work_2', 'time_work_3',
+                  'time_work_4', 'time_work_5', 'time_work_6']
 
-    def create(self, validated_data):
-        doctor = validated_data.get('doctor')
-        day_of_visit = validated_data.get('day_of_visit')
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
 
-        if Timetable.objects.filter(doctor=doctor, day_of_visit=day_of_visit).exists():
-            raise serializers.ValidationError("Расписание для этого врача на этот день уже есть")
+        timetable = Timetable.objects.prefetch_related(
+            'doctor_work_time'
+        ).get(id=instance.id)
+        time_work_dict = {
+            0: "time_work_0",
+            1: "time_work_1",
+            2: "time_work_2",
+            3: "time_work_3",
+            4: "time_work_4",
+            5: "time_work_5",
+            6: "time_work_6",
+        }
 
-        timetable = Timetable.objects.create(doctor=doctor, day_of_visit=day_of_visit)
-        return timetable
+        for i in range(7):
+            time_work_entries = timetable.doctor_work_time.filter(timetable__day_of_visit=i)
+            data[time_work_dict[i]] = [entry.time for entry in time_work_entries]
+            if not data[time_work_dict[i]]:
+                del data[time_work_dict[i]]
+
+        return data
 
 
 class ClinicTimeSerializer(serializers.ModelSerializer):

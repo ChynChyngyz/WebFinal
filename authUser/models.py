@@ -107,6 +107,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
 
+    def clean(self):
+        super().clean()
+
+        times = self.doctor_time_work.all()
+
+        time_values = [time.time for time in times]
+
+        if len(time_values) != len(set(time_values)):
+            raise ValidationError("Невозможно выбрать одинаковое время работы для одного доктора.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.nickname} ({self.email})"
 

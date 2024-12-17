@@ -38,8 +38,8 @@ class RegisterView(APIView):
             )
 
             send_mail(
-                subject="Please confirm registration!",
-                message=f"Hi, {user.nickname}! Follow this link {confirmation_register_url}",
+                subject="Регистрация подтверждение!",
+                message=f"Привет, {user.nickname}! Перейди по этой ссылке {confirmation_register_url}",
                 from_email="Bicos-Abricos@yandex.ru",
                 recipient_list=[user.email, ]
             )
@@ -177,27 +177,6 @@ class AllUsersView(APIView):
         serializer = UserSerializer(paginated_data, many=True)
 
         return paginator.get_paginated_response(serializer.data)
-
-
-class DoctorView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    @extend_schema(
-        request=None,
-        responses={200: DoctorSerializer(many=True)},
-        tags=["Users"],
-    )
-    def get(self, request):
-        doctor = request.doctors
-        serializer = DoctorSerializer(doctor, many=True)
-        return Response({
-            "nickname": doctor.nickname,
-            "email": doctor.email,
-            "first_name": doctor.first_name,
-            "last_name": doctor.last_name,
-            "role": doctor.role,
-            "id": doctor.id
-        })
 
 
 class DeleteUser(APIView):

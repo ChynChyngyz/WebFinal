@@ -1,13 +1,23 @@
 from django.db import models
 from django.utils.timezone import now
+
 from authUser.models import CustomUser
 
 
+class DoctorWorkingTime(models.Model):
+
+    time = models.CharField(max_length=5, unique=True, verbose_name="Время")
+    # doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name="Доктор")
+
+    def __str__(self):
+        return f'Часы работы доктора: {self.time}'
+
+    class Meta:
+        verbose_name = 'Часы работы доктора'
+        verbose_name_plural = 'Часы работы докторов'
+
+
 class Appointment(models.Model):
-
-    DoesNotExist = None
-    objects = None
-
     STATUS_CHOICES = [
         ('WAITING', 'Ожидание'),
         ('COMPLETED', 'Завершен'),
@@ -17,44 +27,21 @@ class Appointment(models.Model):
 
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_user', verbose_name='Пользователь')
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='appointments_as_doctor', verbose_name='Доктор')
-
-    #service = models.ForeignKey(Service, on_delete=models.CASCADE, related_name='service_appointment', verbose_name='услуга')
     date = models.DateField(verbose_name='Дата')
     time = models.TimeField(verbose_name='Время')
     status_of_appointment = models.CharField(max_length=20, choices=STATUS_CHOICES, default='WAITING')
     date_created = models.DateTimeField(auto_now_add=True)
     price = models.FloatField(verbose_name='Цена')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.service = None
-
     def __str__(self):
-        return f'{self.service} ({self.doctor}): ({self.status_of_appointment}) - {self.user}'
+        return f'{self.doctor}: {self.date} - {self.time} ({self.status_of_appointment})'
 
     class Meta:
         verbose_name = 'Запись'
         verbose_name_plural = 'Записи'
 
-    def check_if_expired(self):
-        if self.date < now().date():
-            self.status_of_appointment = 'EXPIRED'
-            self.save()
-
-    def save(self, *args, **kwargs):
-        self.check_if_expired()
-        super().save(*args, **kwargs)
-
-    def canceled(self, *args, **kwargs):
-        self.status_of_appointment = 'CANCELLED'
-        self.save()
-
 
 class Timetable(models.Model):
-
-    DoesNotExist = None
-    objects = None
-
     DAYS_OF_WEEK = (
         (0, 'Monday'),
         (1, 'Tuesday'),
@@ -66,6 +53,7 @@ class Timetable(models.Model):
     )
 
     doctor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, verbose_name='Врач')
+    doctor_work_time = models.ManyToManyField(DoctorWorkingTime, verbose_name='Часы работы врача')
     day_of_visit = models.PositiveSmallIntegerField(choices=DAYS_OF_WEEK, verbose_name='День приема')
 
     def __str__(self):
@@ -93,4 +81,3 @@ class ClinicTime(models.Model):
     class Meta:
         verbose_name = 'Часы работы клиники'
         verbose_name_plural = 'Часы работы клиники'
-

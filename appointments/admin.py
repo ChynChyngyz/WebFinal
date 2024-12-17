@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Appointment, Timetable, ClinicTime
+from .models import Appointment, Timetable, ClinicTime, DoctorWorkingTime
 
 
 @admin.register(Appointment)
@@ -11,8 +11,15 @@ class AppointmentAdmin(admin.ModelAdmin):
 
 @admin.register(Timetable)
 class TimetableAdmin(admin.ModelAdmin):
+    list_display = ('doctor', 'get_doctor_work_times', 'day_of_visit')
 
-    list_display = ('day_of_visit',)
+    def get_doctor_work_times(self, obj):
+        return ", ".join([str(time) for time in obj.doctor_work_time.all()])
+    get_doctor_work_times.short_description = 'Часы работы врача'
+
+    list_filter = ('day_of_visit',)
+
+    filter_horizontal = ('doctor_work_time',)
 
 
 @admin.register(ClinicTime)
@@ -42,3 +49,9 @@ class ClinicTimeAdmin(admin.ModelAdmin):
             )
         }),
     )
+
+
+@admin.register(DoctorWorkingTime)
+class DoctorWorkingTimeAdmin(admin.ModelAdmin):
+
+    list_display = ['time']
